@@ -1,1 +1,78 @@
+1. Load the given dataset into snowflake with a primary key to Order Date column.
+
+use warehouse COMPUTE_WH;
+use i_neuron;
+create or replace table sales_data
+(order_id varchar(50),
+order_date varchar (50) PRIMARY KEY,
+ship_date varchar (50), 
+ship_mode varchar(50),
+customer_name varchar(50),
+segment varchar(50),
+state varchar(50),
+country varchar(40),
+market varchar (50),
+region varchar (60),
+product_id varchar (70),
+category varchar(80),
+sub_category varchar(80),
+product_name varchar(500),
+sales number(10),
+quantity number(10),
+discount number(10),
+profit number(10),
+shipping_cost number(10),
+order_priority varchar(50),
+year number(10));
+
+
+
+
+2. Change the Primary key to Order Id Column.
+
+ALTER TABLE sales_data
+ADD PRIMARY KEY(ORDER_ID);
+
+
+3. Check the data type for Order date and Ship date and mention in what data type it should be?
+
+Update sales_data
+SET order_date=TO_CHAR(DATE(order_date,'DD-MM-YY'),'YYYY-MM-DD') ;
+
+Update sales_data
+SET ship_date=TO_CHAR(DATE(ship_date,'DD-MM-YY'),'YYYY-MM-DD') ;
+
+
+4. Create a new column called order_extract and extract the number after the last ‘–‘from Order ID column.
+
+ALTER TABLE sales_data Add Column order_extract number (10);
+Update sales_data SET order_extract =  
+(SELECT SUBSTR(ORDER_ID,9,7));
+
+5. Create a new column called Discount Flag and categorize it based on discount.Use ‘Yes’ if the discount is greater than zero else ‘No’.
+
+ALTER TABLE sales_data ADD COLUMN  DISCOUNT_FLAG varchar (10); 
+UPDATE sales_data SET DISCOUNT_FLAG = (CASE WHEN DISCOUNT > 0 THEN 'Yes' ELSE 'NO' END);
+
+6. Create a new column called process days and calculate how many days it takes for each order id to process from the order to its shipment.
+
+ALTER TABLE sales_data ADD COLUMN  PROCESS_DAYS varchar (10); 
+UPDATE sales_data SET PROCESS_DAYS = (SELECT DATEDIFF('days',ORDER_DATE,SHIP_DATE));
+
+7. Create a new column called Rating and then based on the Process dates give rating like given below.
+a. If process days less than or equal to 3 days then rating should be 5
+b. If process days are greater than 3 and less than or equal to 6 then rating should be 4
+c. If process days are greater than 6 and less than or equal to 10 then rating should be 3
+d. If process days are greater than 10 then the rating should be 2.
+
+
+
+ALTER TABLE sales_data ADD COLUMN  RATING varchar (10); 
+UPDATE sales_data SET RATING = 
+(CASE
+       WHEN PROCESS_DAYS <=3 THEN 5
+       WHEN PROCESS_DAYS BETWEEN 4 AND 6 THEN 4
+       WHEN PROCESS_DAYS BETWEEN 7 AND 10 THEN 3
+       ELSE 2
+     END);
 
